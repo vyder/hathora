@@ -9,7 +9,6 @@ import {
 import rpsPattern from './assets/rps-pattern.svg'
 
 import theme  from './theme'
-import config from './config'
 
 import Header   from "./components/Header"
 import Footer   from "./components/Footer"
@@ -17,16 +16,14 @@ import Game     from "./components/Game"
 import Lobby    from "./components/Lobby"
 import NotFound from "./components/NotFound"
 
-// import {
-//     HathoraClient,
-//     // HathoraConnection,
-//     // UpdateArgs,
-// } from "../.hathora/client"
+import {
+    HathoraClient,
+    // HathoraConnection,
+    // UpdateArgs,
+} from "../../.hathora/client"
 
-console.log("CONFIG", config)
-
-// const client = new HathoraClient()
-// console.log("APP ID", client.appId)
+const client = new HathoraClient()
+console.log("APP ID", client.appId)
 
 export default function App() {
 
