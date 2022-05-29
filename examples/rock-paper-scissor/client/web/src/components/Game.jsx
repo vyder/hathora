@@ -1,15 +1,22 @@
 import React, { useCallback } from 'react'
 import {
+    Flex,
     Button,
+    Text,
 } from '@chakra-ui/react'
 
-const Game = () => {
-    const createChallenge = useCallback(() => {
-        console.log("Creating Challenge...")
-    }, [])
+const Game = ({ token }) => {
+    // console.log("TOKEN", token)
+
+    const choices = ["ROCK", "PAPER", "SCISSORS"]
 
     return (
-        <Button mb={40} colorScheme="blue" onClick={createChallenge}>Play</Button>
+        <Flex mb={40} w="full" alignItems="center" justifyContent="space-around">
+            <Flex direction="column" gridRowGap={10}>
+                { choices.map(choice => <Button key={choice} colorScheme="blue">{choice}</Button>)}
+            </Flex>
+            <Text>Waiting for Player to join...</Text>
+        </Flex>
     )
 }
 

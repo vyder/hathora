@@ -1,14 +1,21 @@
-import React, { useCallback } from "react"
-import { Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
+import React, {
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from "react"
 import {
-    ChakraProvider,
-    ThemeProvider,
+    Route,
+    Routes,
+    useNavigate,
+} from 'react-router-dom'
+import {
     Flex,
     Box,
+    useToast,
 } from "@chakra-ui/react"
-import rpsPattern from './assets/rps-pattern.svg'
 
-import theme  from './theme'
+import rpsPattern from './assets/rps-pattern.svg'
 
 import Header   from "./components/Header"
 import Footer   from "./components/Footer"
@@ -18,40 +25,75 @@ import NotFound from "./components/NotFound"
 
 import {
     HathoraClient,
-    // HathoraConnection,
-    // UpdateArgs,
 } from "../../.hathora/client"
 
 const client = new HathoraClient()
-console.log("APP ID", client.appId)
+// console.log("APP ID", client.appId)
 
 export default function App() {
-
-    const location = useLocation()
-    console.log(location.pathname)
     const navigate = useNavigate()
-    const params   = useParams()
+    const toast    = useToast()
 
-    const handleConnect = useCallback(() => {
-        navigate('/challenge/banana')
-    }, [navigate])
+    const toastRef = useRef()
+
+    // State
+    const [token, setToken] = useState(null)
+    const [user,  setUser]  = useState(null)
+
+    useEffect(() => {
+        if (!token) {
+            toastRef.current = toast({
+                title: "Loading...",
+                status: "info",
+            })
+            client.loginAnonymous()
+                .then(token => {
+                    sessionStorage.setItem(client.appId, token)
+                    setToken(token)
+                    setUser(HathoraClient.getUserFromToken(token))
+                    toast.update(toastRef.current, {
+                        title: "Logged In!",
+                        status: "success",
+                        isClosable: true,
+                        duration: 1000,
+                    })
+                })
+                .catch(e => toast({
+                    title: "Authentication error: " + e.reason,
+                    status: 'error',
+                    isClosable: true,
+                }))
+        }
+    }, [token])
+
+    // Create token, and go to challenge view
+    const createChallenge = useCallback(() => {
+        client.create(token, {})
+            .then(stateId => navigate(`/challenge/${stateId}`))
+            .catch(() => toast({
+                title: "Oops!",
+                description: "Cannot create a challenge right now.",
+                status: 'error',
+                duration: 3000
+            }))
+    }, [token, client, navigate])
+
+    const isLoading = !token || !user
 
     return (
-        <ChakraProvider>
-            <ThemeProvider theme={theme}>
-                <Box h="full" bgImage={rpsPattern} bgSize="25%" color="white">
-                <Flex direction="column" alignItems="center" h="full" justifyContent="space-between"  pt={8}
-                      bgColor="blackAlpha.700">
-                    <Header/>
-                    <Routes>
-                        <Route path="/challenge/:stateId" element={<Game/>} />
-                        <Route path="/" element={<Lobby onConnect={handleConnect}/>} />
-                        <Route path="*" element={<NotFound/>} />
-                    </Routes>
-                    <Footer/>
-                </Flex>
-                </Box>
-            </ThemeProvider>
-        </ChakraProvider>
+        <>
+            <Box h="full" bgImage={rpsPattern} bgSize="25%" color="white">
+            <Flex direction="column" alignItems="center" h="full" justifyContent="space-between"  pt={8}
+                    bgColor="blackAlpha.700">
+                <Header/>
+                <Routes>
+                    <Route path="/challenge/:stateId" element={<Game token={token} user={user}/>} />
+                    <Route path="/" element={<Lobby isLoading={isLoading} onCreateChallenge={createChallenge}/>} />
+                    <Route path="*" element={<NotFound/>} />
+                </Routes>
+                <Footer/>
+            </Flex>
+            </Box>
+        </>
     )
 }
