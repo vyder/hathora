@@ -9,7 +9,7 @@ const Game = () => {
     }, [])
 
     return (
-        <Button mb={40} colorScheme="blue" onClick={createChallenge}>Create Challenge</Button>
+        <Button mb={40} colorScheme="blue" onClick={createChallenge}>Play</Button>
     )
 }
 
