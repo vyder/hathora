@@ -7,6 +7,7 @@ types:
     id: UserId
     score: int
     gesture: Gesture?
+    isReady: boolean
   PlayerState:
     round: int
     player1: PlayerInfo?

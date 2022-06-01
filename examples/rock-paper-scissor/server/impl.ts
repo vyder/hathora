@@ -11,9 +11,9 @@ export class Impl implements Methods<PlayerState> {
       return Response.error("Already joined");
     }
     if (state.player1 === undefined) {
-      state.player1 = { id: userId, score: 0 };
+      state.player1 = { id: userId, score: 0, isReady: false };
     } else if (state.player2 === undefined) {
-      state.player2 = { id: userId, score: 0 };
+      state.player2 = { id: userId, score: 0, isReady: false };
     } else {
       return Response.error("Game full");
     }
@@ -31,6 +31,7 @@ export class Impl implements Methods<PlayerState> {
       return Response.error("Already picked");
     }
     player.gesture = request.gesture;
+    player.isReady = true;
     const otherPlayer = userId === state.player1.id ? state.player2 : state.player1;
     if (otherPlayer.gesture !== undefined) {
       if (gestureWins(player.gesture, otherPlayer.gesture)) {
@@ -51,6 +52,8 @@ export class Impl implements Methods<PlayerState> {
     state.round++;
     state.player1.gesture = undefined;
     state.player2.gesture = undefined;
+    state.player1.isReady = false;
+    state.player2.isReady = false;
     return Response.ok();
   }
   getUserState(state: PlayerState, userId: UserId): PlayerState {

@@ -16,34 +16,44 @@ const PlayerMat = ({ user, player, chooseGesture }) => {
     const {
         id,
         gesture: gNum,
+        isReady,
     } = player
     const gesture = Gesture[gNum]
 
     const handleChoose = useCallback(gName => () => chooseGesture(Gesture[gName]))
 
-    const isSelf  = (user.id === id)
+    const isCurrentPlayer  = (user.id === id)
     const choices = Object.values(Gesture).filter(g => _.isString(g))
 
-    return (
-        <Flex direction="column" gridRowGap={10} alignItems="center">
-            { !isSelf && !gesture &&
-                <Text>Waiting for Player to choose...</Text>
-            }
-            { !isSelf && gesture &&
-                <NotificationBadge status="success" title="Opponent is Ready!"/>
-            }
-            { isSelf && gesture &&
+    let matDetails = null
+
+    if (isCurrentPlayer) {
+        if (gesture !== undefined) {
+            matDetails = (
                 <>
                 <Text>You have chosen {gesture}!</Text>
                 <NotificationBadge status="success" title="Ready!"/>
                 </>
-            }
-            { isSelf && (gesture === undefined) && choices.map(choice => (
+            )
+        } else {
+            matDetails = choices.map(choice => (
                 <Button key={choice} colorScheme="blue"
                         onClick={handleChoose(choice)}>
                     {choice}
                 </Button>
-            ))}
+            ))
+        }
+    } else {
+        if (!isReady) {
+            matDetails = <Text>Waiting for Player to choose...</Text>
+        } else {
+            matDetails = <NotificationBadge status="success" title="Opponent is Ready!"/>
+        }
+    }
+
+    return (
+        <Flex direction="column" gridRowGap={10} alignItems="center">
+            { matDetails }
         </Flex>
     )
 }
